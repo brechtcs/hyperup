@@ -1,0 +1,37 @@
+{
+  "name": "hyperup",
+  "version": "0.2.0",
+  "description": "Upload files to a remote Hyperdrive daemon",
+  "bin": {
+    "hyperup": "./bin"
+  },
+  "dependencies": {
+    "await-callback": "^1.0.1",
+    "hyperdrive-daemon-client": "^1.15.1",
+    "stdrun": "^6.0.0"
+  },
+  "devDependencies": {
+    "standard": "^14.3.4"
+  },
+  "scripts": {
+    "prepare": "npm test",
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brechtcs/hyperup.git"
+  },
+  "keywords": [
+    "hyperdrive",
+    "daemon",
+    "remote",
+    "file",
+    "upload"
+  ],
+  "author": "Brecht Savelkoul <brecht.savelkoul@alumni.lse.ac.uk>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/brechtcs/hyperup/issues"
+  },
+  "homepage": "https://github.com/brechtcs/hyperup#readme"
+}

@@ -1,0 +1,30 @@
+#!/usr/bin/node
+
+var { HyperdriveClient } = require('hyperdrive-daemon-client')
+var { basename, join } = require('path')
+var { createReadStream, readFileSync } = require('fs')
+var { homedir } = require('os')
+var { run } = require('stdrun')
+
+var DEFAULT_CONF = join(homedir(), '.hyperup')
+
+async function up (file, id) {
+  var { drives, endpoint, token } = readConfig()
+  var client = new HyperdriveClient(endpoint, token)
+  await client.ready()
+
+  var key = drives[id] || id
+  var target = basename(file)
+  var drive = await client.drive.get({ key })
+
+  var from = createReadStream(file)
+  var to = drive.createWriteStream(target)
+  from.pipe(to)
+}
+
+function readConfig (path = DEFAULT_CONF) {
+  var json = readFileSync(path)
+  return JSON.parse(json)
+}
+
+run(up)
