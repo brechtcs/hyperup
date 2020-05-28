@@ -1,30 +1,77 @@
 #!/usr/bin/node
 
 var { HyperdriveClient } = require('hyperdrive-daemon-client')
-var { basename, join } = require('path')
-var { createReadStream, readFileSync } = require('fs')
+var { basename, join, relative } = require('path')
+var { createReadStream, readFileSync, stat } = require('fs')
 var { homedir } = require('os')
-var { run } = require('stdrun')
+var { list } = require('stdopt')
+var { run, text } = require('stdrun')
+var Args = require('stdarg')
+var Path = require('./lib/path')
+var pkg = require('./package')
+var promise = require('await-callback')
+var walk = require('walkdir')
 
 var DEFAULT_CONF = join(homedir(), '.hyperup')
 
-async function up (file, id) {
+var command = new Args()
+command.use(['ignore', 'i'], 'Files or directories to ignore', list.of(Path))
+command.use(['help', 'h'], 'Display help information')
+
+async function * up () {
+  var argv = Array.from(arguments)
+  var opts = command.parse(argv)
   var { drives, endpoint, token } = readConfig()
+
+  if (opts.help) {
+    yield text`Hyperup, version ${pkg.version}`
+    yield text`Daemon endpoint: ${endpoint}`
+    yield text`\n\n Usage: hyperup [options] <file-or-directory> [hyperdrive-key]`
+    yield* command.help().map(text)
+    return
+  }
+
+  var [ path, key ] = argv
   var client = new HyperdriveClient(endpoint, token)
   await client.ready()
 
-  var key = drives[id] || id
-  var target = basename(file)
+  var st = await promise(done => stat(path, done))
   var drive = await client.drive.get({ key })
+  if (!key) yield text`Created hyper://${drive.key.toString('hex')}`
 
-  var from = createReadStream(file)
+  if (st.isFile()) {
+    return upfile(drive, path, basename(path))
+  } else if (st.isDirectory()) {
+    return updir(drive, path, { ignore: opts.ignore || [] })
+  }
+}
+
+function updir (drive, dir, opts) {
+  walk(dir, function (path, st) {
+    var target = relative(dir, path)
+
+    if (opts.ignore.includes(target)) {
+      return this.ignore(path)
+    }
+    if (st.isFile()) {
+      upfile(drive, path, target)
+    }
+  })
+}
+
+function upfile (drive, path, target) {
+  var from = createReadStream(path)
   var to = drive.createWriteStream(target)
   from.pipe(to)
 }
 
 function readConfig (path = DEFAULT_CONF) {
-  var json = readFileSync(path)
-  return JSON.parse(json)
+  try {
+    var json = readFileSync(path)
+    return JSON.parse(json)
+  } catch (err) {
+    return {}
+  }
 }
 
 run(up)

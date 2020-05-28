@@ -19,10 +19,16 @@ Start by defining a `~/.hyperup` file containing the configuration of your remot
 }
 ```
 
-Then invoke the command as follows:
+When that's done, you should be able to use the command.
 
 ```
-$ hyperup path/to/file.txt <drive-key>
+$ hyperup --help
+Hyperup, version 1.0.0
+Daemon endpoint: example.com:3101
+
+Usage: hyperup [options] <file-or-directory> [hyperdrive-key]
+--ignore, -i    Files or directories to ignore
+--help, -h      Display help information
 ```
 
 ## License
