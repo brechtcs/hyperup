@@ -21,12 +21,12 @@ command.use(['help', 'h'], 'Display help information')
 async function * up () {
   var argv = Array.from(arguments)
   var opts = command.parse(argv)
-  var { drives, endpoint, token } = readConfig()
+  var { endpoint, token } = readConfig()
 
   if (opts.help) {
     yield text`Hyperup, version ${pkg.version}`
     yield text`Daemon endpoint: ${endpoint}`
-    yield text`\n\n Usage: hyperup [options] <file-or-directory> [hyperdrive-key]`
+    yield text`\n\n Usage: hyperup [options] <file-or-directory> [hyperdrive-url]`
     yield* command.help().map(text)
     return
   }
