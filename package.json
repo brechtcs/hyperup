@@ -1,6 +1,6 @@
 {
   "name": "hyperup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Upload files to a remote Hyperdrive daemon",
   "bin": {
     "hyperup": "./bin"
